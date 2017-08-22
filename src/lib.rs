@@ -193,7 +193,7 @@ mod tests {
         let ctx = ResolverContext::default();
         let parser = build_parser(Lang::EN).unwrap();
         let number = "one million five hundred twenty-one thousand eighty-two";
-        let result = parser.parse_with_kind_order(number, &ctx,  &[OutputKind::Number]).unwrap();
+        let result = parser.parse_with_kind_order(number, &ctx, &[OutputKind::Number]).unwrap();
         let int: output::IntegerOutput = result[0].value.clone().attempt_into().unwrap();
         assert_eq!(1521082, int.0);
     }
