@@ -150,29 +150,36 @@ pub fn examples_temperature(v: &mut Vec<::rustling::train::Example<Dimension>>) 
 
 pub fn examples_numbers(v: &mut Vec<::rustling::train::Example<Dimension>>) {
     example!(v, check_integer(0), "0", "〇", "零", "零个", "0个");
-    example!(v, check_integer(1), "1", "一", "一个", "1个");
-    example!(v, check_integer(2), "2", "二", "两", "兩", "二個", "二个");
-    example!(v, check_integer(3), "3", "三");
-    example!(v, check_integer(4), "4", "四");
-    example!(v, check_integer(5), "5", "五");
-    example!(v, check_integer(6), "6", "六");
-    example!(v, check_integer(7), "7", "七");
-    example!(v, check_integer(8), "8", "八");
-    example!(v, check_integer(9), "9", "九");
-    example!(v, check_integer(10), "10", "十");
+    example!(v, check_integer(1), "1", "一", "一个", "1个", "壹");
+    example!(v, check_integer(2), "2", "二", "两", "兩", "二個", "二个", "贰");
+    example!(v, check_integer(3), "3", "三", "叁");
+    example!(v, check_integer(4), "4", "四", "肆");
+    example!(v, check_integer(5), "5", "五", "伍");
+    example!(v, check_integer(6), "6", "六", "陆");
+    example!(v, check_integer(7), "7", "七", "柒");
+    example!(v, check_integer(8), "8", "八", "捌");
+    example!(v, check_integer(9), "9", "九", "玖");
+    example!(v, check_integer(10), "10", "十", "拾");
+    example!(v, check_integer(100), "100", "百", "仟");
+    example!(v, check_integer(1000), "1000",  "千", "佰");
+    example!(v, check_integer(10000), "10000", "万");
+    example!(v, check_integer(1000000000), "1000000000", "亿");
+    example!(v, check_integer(24), "24", "两打", "2打");
+    example!(v, check_integer(100000), "十万");
     example!(v, check_float(1.1), "1.1", "1.10", "01.10");
     example!(v, check_float(0.77), "0.77", ".77");
     example!(v, check_integer(20), "20", "二十");
     example!(v, check_integer(30), "30", "三十");
     example!(v, check_integer(40), "40", "四十");
     example!(v, check_integer(90), "90", "九十");
-    example!(v, check_integer(3000000), "3M", "3000K", "3000000", "3,000,000");
-    example!(v, check_integer(1200000), "1200K", "1200.0K", "1.2M", ".0012G", "1,200,000");
+    example!(v, check_integer(3000000), "3M", "3000K", "3000000", "3,000,000", "三百万", "300万");
+    example!(v, check_integer(1200000), "1200K", "1200.0K", "1.2M", ".0012G", "1,200,000", "120万", "一百二十万");
     example!(v, check_float(1200000.0), "1,200,000.00");
     example!(v, check_integer(33), "33", "三十三");
     example!(v, check_integer(96), "96", "九十六");
     example!(v, check_integer(14), "14", "十四");
     example!(v, check_integer(11), "11", "十一");
+    example!(v, check_integer(5000), "5k", "五千");
     example!(v,
              check_integer(-1200000),
              "- 1,200,000",
@@ -184,8 +191,15 @@ pub fn examples_numbers(v: &mut Vec<::rustling::train::Example<Dimension>>) {
              "负 1200000",
              "-1.2M",
              "-1200K",
-             "-.0012G");
+             "-.0012G",
+             "负一百二十万");
     example!(v, check_ordinal(7), "第七");
     example!(v, check_ordinal(11), "第十一");
     example!(v, check_ordinal(91), "第九十一");
+    example!(v, check_integer(122), "一百二十二");
+    example!(v, check_integer(200000), "20万");
+    example!(v, check_integer(21011), "两万一千零十一");
+    example!(v, check_integer(721012), "七十二万一千零十二");
+    example!(v, check_integer(2200000), "2.2M", "220万");
+    example!(v, check_float(122.2), "一百二十二点二");
 }

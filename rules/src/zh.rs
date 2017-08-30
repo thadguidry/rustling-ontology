@@ -752,24 +752,41 @@ pub fn rules_temperature(b: &mut RuleSetBuilder<Dimension>) -> RustlingResult<()
 
 
 pub fn rules_numbers(b: &mut RuleSetBuilder<Dimension>) -> RustlingResult<()> {
+    b.rule_2("intersect",
+             integer_filter!(|integer: &IntegerValue| integer.grain.unwrap_or(0) > 1),
+             integer_check!(),
+             |a, b| {
+                 IntegerValue::new_with_grain(a.value().value + b.value().value, a.value().grain.unwrap_or(0))
+             });
+
     b.rule_1_terminal("integer (0..10)",
-                      b.reg(r#"(〇|零|一|二|两|兩|三|四|五|六|七|八|九|十)(?:个|個)?"#)?,
+                      b.reg(r#"(〇|零|一|二|两|兩|三|四|五|六|七|八|九|十|壹|贰|叁|肆|伍|陆|柒|捌|玖|拾)(?:个|個)?"#)?,
                       |text_match| {
                           let value = match text_match.group(1).as_ref() {
                               "〇" => 0,
                               "零" => 0,
                               "一" => 1,
+                              "壹" => 1,
                               "二" => 2,
                               "两" => 2,
                               "兩" => 2,
+                              "贰" => 2,
                               "三" => 3,
+                              "叁" => 3,
                               "四" => 4,
+                              "肆" => 4,
                               "五" => 5,
+                              "伍" => 5,
                               "六" => 6,
+                              "陆" => 6,
                               "七" => 7,
+                              "柒" => 7,
                               "八" => 8,
+                              "捌" => 8,
                               "九" => 9,
+                              "玖" => 9,
                               "十" => 10,
+                              "拾" => 10,
                               _ => return Err(RuleErrorKind::Invalid.into())
                           };
                           IntegerValue::new_with_grain(value, 1)
@@ -911,6 +928,105 @@ pub fn rules_numbers(b: &mut RuleSetBuilder<Dimension>) -> RustlingResult<()> {
                  })
              }
     );
+
+    b.rule_1_terminal("hundred",
+                      b.reg(r#"百|仟"#)?,
+                      |_| IntegerValue::new_with_grain(100, 2)
+    );
+
+    b.rule_1_terminal("thousand",
+                      b.reg(r#"千|佰"#)?,
+                      |_| IntegerValue::new_with_grain(1000, 3)
+    );
+
+
+    b.rule_1_terminal("ten-thousand",
+                      b.reg(r#"万"#)?,
+                      |_| IntegerValue::new_with_grain(10000, 4)
+    );
+
+
+    b.rule_1_terminal("billion",
+                      b.reg(r#"亿"#)?,
+                      |_| IntegerValue::new_with_grain(1000000000, 9)
+    );
+
+    b.rule_1_terminal("dozen",
+                      b.reg(r#"打"#)?,
+                      |_| Ok(IntegerValue {
+                          value: 12,
+                          grain: Some(1),
+                          group: true,
+                          ..IntegerValue::default()
+                      })
+    );
+
+    b.rule_2("number dozen",
+             integer_check!(1, 10),
+             integer_filter!(|integer: &IntegerValue| integer.group),
+             |a, b| {
+                 Ok(IntegerValue {
+                     value: a.value().value * b.value().value,
+                     grain: b.value().grain,
+                     ..IntegerValue::default()
+                 })
+             });
+
+    b.rule_2("number hundreds",
+             integer_check!(1, 9),
+             integer_check!(100, 100),
+             |a, b| {
+                 Ok(IntegerValue {
+                     value: a.value().value * b.value().value,
+                     grain: b.value().grain,
+                     ..IntegerValue::default()
+                 })
+             });
+
+    b.rule_2("number thousands",
+             integer_check!(1, 9),
+             integer_check!(1000, 1000),
+             |a, b| {
+                 Ok(IntegerValue {
+                     value: a.value().value * b.value().value,
+                     grain: b.value().grain,
+                     ..IntegerValue::default()
+                 })
+             });
+
+    b.rule_2("number ten-thousands",
+             integer_check!(1, 9999),
+             integer_check!(10000, 10000),
+             |a, b| {
+                 Ok(IntegerValue {
+                     value: a.value().value * b.value().value,
+                     grain: b.value().grain,
+                     ..IntegerValue::default()
+                 })
+             });
+
+    b.rule_2("number billion",
+             integer_check!(1, 999),
+             integer_check!(1000000000, 1000000000),
+             |a, b| {
+                 Ok(IntegerValue {
+                     value: a.value().value * b.value().value,
+                     grain: b.value().grain,
+                     ..IntegerValue::default()
+                 })
+             });
+
+
+    b.rule_3("number dot number",
+             number_check!(|number: &NumberValue| !number.prefixed()),
+             b.reg(r#"点"#)?,
+             number_check!(|number: &NumberValue| !number.suffixed()),
+             |a, _, b| {
+                 Ok(FloatValue {
+                     value: b.value().value() * 0.1 + a.value().value(),
+                     ..FloatValue::default()
+                 })
+             });
 
     Ok(())
 }
