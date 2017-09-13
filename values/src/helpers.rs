@@ -27,7 +27,7 @@ pub fn find_regex_group<'a>(regex: &Regex, sentence: &'a str) -> RuleResult<Vec<
     let mut matches = Vec::new();
     for cap in regex.captures_iter(&sentence) {
         let _ = cap.get(0)
-                    .ok_or_else(|| format!("No capture for regexp {} for sentence: {}", regex, sentence))?;
+            .ok_or_else(|| format!("No capture for regexp {} for sentence: {}", regex, sentence))?;
         let mut groups = Vec::new();
         for group in cap.iter() {
             groups.push(group.map(|g| g.as_str()));
@@ -48,10 +48,10 @@ pub fn compose_money(a: &AmountOfMoneyValue,
                      -> RuleResult<AmountOfMoneyValue> {
     let amount = a.value + b.value / 100.0;
     Ok(AmountOfMoneyValue {
-           value: amount,
-           unit: a.unit,
-           ..AmountOfMoneyValue::default()
-       })
+        value: amount,
+        unit: a.unit,
+        ..AmountOfMoneyValue::default()
+    })
 }
 
 pub fn compose_money_number(a: &AmountOfMoneyValue,
@@ -59,21 +59,51 @@ pub fn compose_money_number(a: &AmountOfMoneyValue,
                             -> RuleResult<AmountOfMoneyValue> {
     let amount = a.value + b.value() / 100.0;
     Ok(AmountOfMoneyValue {
-           value: amount,
-           unit: a.unit,
-           ..AmountOfMoneyValue::default()
-       })
+        value: amount,
+        unit: a.unit,
+        ..AmountOfMoneyValue::default()
+    })
 }
 
 impl Form {
     fn time_of_day(full_hour: u32, is_12_clock: bool) -> Form {
         Form::TimeOfDay(Some(TimeOfDayForm {
-                                 full_hour: full_hour,
-                                 is_12_clock: is_12_clock,
-                             }))
+            full_hour: full_hour,
+            is_12_clock: is_12_clock,
+        }))
     }
 }
 
+impl PartOfDayScope {
+    pub fn am() -> PartOfDayScope {
+        PartOfDayScope {
+            start: 0,
+            end: 12,
+            is_12_clock: false
+        }
+    }
+
+    pub fn pm() -> PartOfDayScope {
+        PartOfDayScope {
+            start: 12,
+            end: 0,
+            is_12_clock: false
+        }
+    }
+
+    pub fn new(start: u32, end: u32, is_12_clock: bool) -> PartOfDayScope {
+        PartOfDayScope {
+            start,
+            end,
+            is_12_clock,
+        }
+    }
+
+    pub fn build_extensible_span(&self) -> RuleResult<TimeValue> {
+        Ok(hour(self.start, self.is_12_clock)?
+            .span_to(&hour(self.end, self.is_12_clock)?, false)?)
+    }
+}
 
 fn precision_resolution(lhs: Precision, rhs: Precision) -> Precision {
     if lhs == Precision::Approximate || rhs == Precision::Approximate {
@@ -99,7 +129,7 @@ impl TimeValue {
     }
 
     pub fn not_latent(self) -> TimeValue {
-        TimeValue { latent: false, .. self }
+        TimeValue { latent: false, ..self }
     }
 
     pub fn form(self, form: Form) -> TimeValue {
@@ -122,40 +152,40 @@ impl TimeValue {
 
     pub fn intersect(&self, other: &TimeValue) -> RuleResult<TimeValue> {
         Ok(TimeValue::constraint(self.constraint.intersect(&other.constraint))
-               .direction(self.direction.or(other.direction))
-               .precision(precision_resolution(self.precision, other.precision)))
+            .direction(self.direction.or(other.direction))
+            .precision(precision_resolution(self.precision, other.precision)))
     }
 
     pub fn last_of(&self, other: &TimeValue) -> RuleResult<TimeValue> {
         Ok(TimeValue::constraint(self.constraint.last_of(&other.constraint))
-                .precision(precision_resolution(self.precision, other.precision)))
+            .precision(precision_resolution(self.precision, other.precision)))
     }
 
     pub fn the_nth(&self, n: i64) -> RuleResult<TimeValue> {
         Ok(TimeValue::constraint(self.constraint.take_the_nth(n))
-                .precision(self.precision))
+            .precision(self.precision))
     }
 
     pub fn the_nth_not_immediate(&self, n: i64) -> RuleResult<TimeValue> {
         Ok(TimeValue::constraint(self.constraint.take_the_nth_not_immediate(n))
-                .precision(self.precision))
+            .precision(self.precision))
     }
 
     pub fn the_nth_after(&self, n: i64, after_value: &TimeValue) -> RuleResult<TimeValue> {
         Ok(TimeValue::constraint(self.constraint
-                                     .the_nth(n)
-                                     .after_not_immediate(&after_value.constraint))
-                                     .precision(precision_resolution(self.precision, after_value.precision)))
+            .the_nth(n)
+            .after_not_immediate(&after_value.constraint))
+            .precision(precision_resolution(self.precision, after_value.precision)))
     }
 
     pub fn span_to(&self, to: &TimeValue, is_inclusive: bool) -> RuleResult<TimeValue> {
         if (self.constraint.grain() == Grain::Day && to.constraint.grain() == Grain::Day) ||
-           is_inclusive {
+            is_inclusive {
             Ok(TimeValue::constraint(self.constraint.span_inclusive_to(&to.constraint))
-                    .precision(precision_resolution(self.precision, to.precision)))
+                .precision(precision_resolution(self.precision, to.precision)))
         } else {
             Ok(TimeValue::constraint(self.constraint.span_to(&to.constraint))
-                    .precision(precision_resolution(self.precision, to.precision)))
+                .precision(precision_resolution(self.precision, to.precision)))
         }
     }
 
@@ -174,6 +204,14 @@ impl TimeValue {
             Err(format!("Form {:?} is not a time of day form", self.form))?
         }
     }
+//
+//    pub fn scope_part_of_day(&self) -> RuleResult<Option<PartOfDayScope>> {
+//        if let Form::PartOfDay { extended_scope: v } = self.form.clone() {
+//            Ok(v)
+//        } else {
+//            Err(format!("Form {:?} is not a part of day form", self.form))?
+//        }
+//    }
 }
 
 pub fn year(y: i32) -> RuleResult<TimeValue> {
@@ -182,14 +220,14 @@ pub fn year(y: i32) -> RuleResult<TimeValue> {
 
 pub fn month(m: u32) -> RuleResult<TimeValue> {
     if !(1 <= m && m <= 12) {
-        return Err(RuleErrorKind::Invalid.into())
+        return Err(RuleErrorKind::Invalid.into());
     }
     Ok(TimeValue::constraint(Month::new(m)).form(Form::Month(m)))
 }
 
 pub fn day_of_month(dom: u32) -> RuleResult<TimeValue> {
     if !(1 <= dom && dom <= 31) {
-        return Err(RuleErrorKind::Invalid.into())
+        return Err(RuleErrorKind::Invalid.into());
     }
     Ok(TimeValue::constraint(DayOfMonth::new(dom)).form(Form::DayOfMonth))
 }
@@ -221,21 +259,21 @@ pub fn second(s: u32) -> RuleResult<TimeValue> {
 pub fn hour_minute(h: u32, m: u32, is_12_clock: bool) -> RuleResult<TimeValue> {
     if is_12_clock {
         Ok(TimeValue::constraint(HourMinute::clock_12(h, m))
-           .form(Form::TimeOfDay(None)))
+            .form(Form::TimeOfDay(None)))
     } else {
         Ok(TimeValue::constraint(HourMinute::clock_24(h, m))
-           .form(Form::TimeOfDay(None)))
+            .form(Form::TimeOfDay(None)))
     }
 }
 
 pub fn hour_minute_second(h: u32,
-                                   m: u32,
-                                   s: u32,
-                                   is_12_clock: bool)
-                                   -> RuleResult<TimeValue> {
+                          m: u32,
+                          s: u32,
+                          is_12_clock: bool)
+                          -> RuleResult<TimeValue> {
     Ok(hour_minute(h, m, is_12_clock)?
-           .intersect(&second(s)?)?
-           .form(Form::TimeOfDay(None)))
+        .intersect(&second(s)?)?
+        .form(Form::TimeOfDay(None)))
 }
 
 pub fn hour_relative_minute(h: u32, m: i32, is_12_clock: bool) -> RuleResult<TimeValue> {
@@ -278,8 +316,8 @@ pub fn cycle_nth_after_not_immediate(grain: Grain,
                                      after_value: &TimeValue)
                                      -> RuleResult<TimeValue> {
     Ok(TimeValue::constraint(Cycle::rc(grain)
-                                 .the_nth(n)
-                                 .after_not_immediate(&after_value.constraint)).form(Form::Cycle(grain)))
+        .the_nth(n)
+        .after_not_immediate(&after_value.constraint)).form(Form::Cycle(grain)))
 }
 
 pub fn cycle_n(grain: Grain, n: i64) -> RuleResult<TimeValue> {
@@ -291,7 +329,7 @@ pub fn cycle_n_not_immediate(grain: Grain, n: i64) -> RuleResult<TimeValue> {
 }
 
 pub fn ymd(y: i32, m: u32, d: u32) -> RuleResult<TimeValue> {
-     Ok(TimeValue::constraint(YearMonthDay::new(y, m, d)))
+    Ok(TimeValue::constraint(YearMonthDay::new(y, m, d)))
 }
 
 impl CycleValue {
@@ -301,15 +339,14 @@ impl CycleValue {
 }
 
 impl DurationValue {
-
     pub fn in_present(&self) -> RuleResult<TimeValue> {
         Ok(TimeValue::constraint(Cycle::rc(Grain::Second).take_the_nth(0).shift_by(self.period.clone())).precision(self.precision))
     }
 
     pub fn ago(&self) -> RuleResult<TimeValue> {
         Ok(TimeValue::constraint(Cycle::rc(Grain::Second)
-                                     .take_the_nth(0)
-                                     .shift_by(-self.period.clone())).precision(self.precision))
+            .take_the_nth(0)
+            .shift_by(-self.period.clone())).precision(self.precision))
     }
 
     pub fn after(&self, time: &TimeValue) -> RuleResult<TimeValue> {

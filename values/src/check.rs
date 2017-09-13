@@ -12,7 +12,11 @@ pub struct CheckInteger {
 impl Check<Dimension> for CheckInteger {
     fn check(&self, pn: &ParsedNode<Dimension>) -> bool {
         IntegerValue::attempt_from(pn.value.clone())
-            .map(|v| v.value == self.value)
+            .map(|v| {
+                println!("{:?}", self);
+                println!("{:?}", v);
+                v.value == self.value
+            })
             .unwrap_or(false)
     }
 }
@@ -84,6 +88,10 @@ pub struct CheckMoment {
 
 impl Check<Dimension> for CheckMoment {
     fn check(&self, pn: &ParsedNode<Dimension>) -> bool {
+        let resolved = self.context.resolve(&pn.value);
+        println!("{:?}", self);
+        println!("{:?}", resolved);
+
         match self.direction {
             None => {
                 self.context.resolve(&pn.value)
@@ -149,6 +157,8 @@ impl Check<Dimension> for CheckMomentSpan {
         self.context.resolve(&pn.value)
             .and_then(|v| TimeIntervalOutput::attempt_from(v))
             .map(|v| {
+                println!("{:?}", self);
+                println!("{:?}", v);
                 if let TimeIntervalOutput::Between { start, end, precision, .. } = v {
                     start == self.interval.start && Some(end) == self.interval.end && precision == self.precision
                 } else {
@@ -196,7 +206,11 @@ pub struct CheckTemperature {
 impl Check<Dimension> for CheckTemperature {
     fn check(&self, pn: &ParsedNode<Dimension>) -> bool {
         TemperatureValue::attempt_from(pn.value.clone())
-            .map(|v| v.value == self.value && v.unit == self.unit)
+            .map(|v| {
+                println!("{:?}", self);
+                println!("{:?}", v);
+                v.value == self.value && v.unit == self.unit
+            })
             .unwrap_or(false)
     }
 }

@@ -372,10 +372,11 @@ pub enum Form {
     DayOfMonth,
     TimeOfDay(Option<TimeOfDayForm>),
     DayOfWeek { not_immediate: bool },
-    PartOfDay,
+    PartOfDay { extended_scope: Option<PartOfDayScope> },
     PartOfYear,
     Empty,
 }
+
 
 impl Form {
     pub fn not_immediate(&self) -> Option<bool> {
@@ -386,11 +387,18 @@ impl Form {
             &Form::TimeOfDay(_) => None,
             &Form::DayOfWeek { not_immediate } => Some(not_immediate),
             &Form::Empty => None,
-            &Form::PartOfDay => None,
+            &Form::PartOfDay { .. } => None,
             &Form::PartOfYear => None,
             &Form::DayOfMonth => None,
         }
     }
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct PartOfDayScope {
+    pub start: u32,
+    pub end: u32,
+    pub is_12_clock: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
