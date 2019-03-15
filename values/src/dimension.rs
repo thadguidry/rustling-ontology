@@ -52,6 +52,8 @@ rustling_value! {
             &Dimension::RelativeMinute(_) => None,
         }
     }
+
+
 }
 
 
@@ -71,6 +73,22 @@ impl Dimension {
             &Dimension::RelativeMinute(_) => true,
         }
     }
+    pub fn extract_datetime_type(&self) -> DatetimeType {
+        match self {
+            &Dimension::Number(_) => DatetimeType::Empty,
+            &Dimension::Percentage(_) => DatetimeType::Empty,
+            &Dimension::AmountOfMoney(_) => DatetimeType::Empty,
+            &Dimension::Ordinal(_) => DatetimeType::Empty,
+            &Dimension::Temperature(_) => DatetimeType::Empty,
+            &Dimension::MoneyUnit(_) => DatetimeType::Empty,
+            &Dimension::Datetime(ref dtv) => dtv.datetime_type,
+            &Dimension::Duration(_) => DatetimeType::Empty,
+            &Dimension::Cycle(_) => DatetimeType::Empty,
+            &Dimension::UnitOfDuration(_) => DatetimeType::Empty,
+            &Dimension::RelativeMinute(_) => DatetimeType::Empty,
+        }
+    }
+
 }
 
 #[derive(Debug, PartialEq, Copy, Clone, Hash, Eq)]
@@ -99,7 +117,7 @@ impl fmt::Display for Dimension {
     }
 }
 
-/// Payload for the ordinal numbers of Dimension
+/// Payload for the ordinal numbers value of Dimension
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct OrdinalValue {
     pub value: i64,
@@ -145,7 +163,7 @@ impl Default for Precision {
     }
 }
 
-/// Payload for the amount of money of Dimension
+/// Payload for the amount of money value of Dimension
 #[derive(Debug, PartialEq, Copy, Clone, Default)]
 pub struct AmountOfMoneyValue {
     pub value: f32,
@@ -153,7 +171,7 @@ pub struct AmountOfMoneyValue {
     pub unit: Option<&'static str>,
 }
 
-/// Payload for the unit of money of Dimension
+/// Payload for the unit of money value of Dimension
 #[derive(Debug, PartialEq, Copy, Clone, Default)]
 pub struct MoneyUnitValue {
     pub unit: Option<&'static str>,
@@ -165,7 +183,7 @@ pub enum CombinationDirection {
     Right,
 }
 
-/// Payload for the integral numbers of Dimension
+/// Payload for the integer numbers value of Dimension
 #[derive(Debug, PartialEq, Clone, Default)]
 pub struct IntegerValue {
     pub value: i64,
@@ -313,7 +331,7 @@ impl AttemptFrom<Dimension> for FloatValue {
     }
 }
 
-/// Payload for the floating numbers of Dimension
+/// Payload for the floating numbers value of Dimension
 #[derive(Debug, PartialEq, Clone, Default)]
 pub struct FloatValue {
     pub value: f32,
@@ -441,7 +459,7 @@ impl NumberValue {
     }
 }
 
-/// Payload for the temperatures of Dimension
+/// Payload for the temperatures value of Dimension
 #[derive(Debug, PartialEq, Clone)]
 pub struct TemperatureValue {
     pub value: f32,
@@ -451,7 +469,7 @@ pub struct TemperatureValue {
     pub latent: bool,
 }
 
-/// Payload for the cycle of Dimension
+/// Payload for the cycle value of Dimension
 #[derive(Debug, PartialEq, Clone)]
 pub struct CycleValue {
     pub is_plural: bool,
@@ -471,7 +489,7 @@ impl CycleValue {
     }
 }
 
-/// Payload for the unit of duration of Dimension
+/// Payload for the unit of duration value of Dimension
 #[derive(Debug, PartialEq, Clone)]
 pub struct UnitOfDurationValue {
     pub grain: Grain,
@@ -490,11 +508,12 @@ pub enum Ambiguity {
     Big,
 }
 
-/// Payload for the datetime of Dimension
+/// Payload for the datetime value of Dimension
 #[derive(Clone)]
 pub struct DatetimeValue {
     pub constraint: RcConstraint<Local>,
     pub form: Form,
+    pub datetime_type: DatetimeType,
     pub direction: Option<BoundedDirection>,
     pub precision: Precision,
     pub latent: bool,
@@ -524,6 +543,7 @@ impl DatetimeValue {
         (self.constraint.coarse_grain_step() as usize) > (grain as usize)
     }
 }
+
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Form {
@@ -567,6 +587,22 @@ impl Form {
         }
     }
 }
+
+
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum DatetimeType {
+    // Any of 4 subtypes below
+    DatetimeGeneral,
+    // 4 datetime subtypes
+    Date,
+    DatePeriod,
+    Time,
+    TimePeriod,
+    // Remaining cases - hybrid subtype
+    DatetimeComplement,
+    Empty,
+}
+
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Direction {

@@ -7,8 +7,14 @@ pub enum Output {
     Float(FloatOutput),
     Percentage(PercentageOutput),
     Ordinal(OrdinalOutput),
+    // Legacy Datetime type + complement Datetime type from new specs
     Datetime(DatetimeOutput),
     DatetimeInterval(DatetimeIntervalOutput),
+    // New Datetime types from new specs
+    Date(DatetimeOutput),
+    DatePeriod(DatetimeIntervalOutput),
+    Time(DatetimeOutput),
+    TimePeriod(DatetimeIntervalOutput),
     AmountOfMoney(AmountOfMoneyOutput),
     Temperature(TemperatureOutput),
     Duration(DurationOutput),
@@ -22,10 +28,25 @@ impl Output {
             &Output::Ordinal(_) => OutputKind::Ordinal,
             &Output::Datetime(_) => OutputKind::Datetime,
             &Output::DatetimeInterval(_) => OutputKind::Datetime,
+            &Output::Date(_) => OutputKind::Datetime,
+            &Output::DatePeriod(_) => OutputKind::Datetime,
+            &Output::Time(_) => OutputKind::Datetime,
+            &Output::TimePeriod(_) => OutputKind::Datetime,
             &Output::AmountOfMoney(_) => OutputKind::AmountOfMoney,
             &Output::Temperature(_) => OutputKind::Temperature,
             &Output::Duration(_) => OutputKind::Duration,
             &Output::Percentage(_) => OutputKind::Percentage,
+        }
+    }
+    pub fn identify(&self) -> &'static str {
+        match self {
+            &Output::Datetime(_) => "Output::Datetime",
+            &Output::DatetimeInterval(_) => "Output::DatetimeInterval",
+            &Output::Date(_) => "OutputKind::Datetime",
+            &Output::DatePeriod(_) => "OutputKind::Datetime",
+            &Output::Time(_) => "OutputKind::Datetime",
+            &Output::TimePeriod(_) => "OutputKind::Datetime",
+            _ => "Output::Other",
         }
     }
 }
@@ -36,6 +57,10 @@ enum_kind!(OutputKind,
         Ordinal,
         Duration,
         Datetime,
+        Date,
+        DatePeriod,
+        Time,
+        TimePeriod,
         AmountOfMoney,
         Temperature,
         Percentage
@@ -48,6 +73,10 @@ impl OutputKind {
             &OutputKind::Number => DimensionKind::Number,
             &OutputKind::Ordinal => DimensionKind::Ordinal,
             &OutputKind::Datetime => DimensionKind::Datetime,
+            &OutputKind::Date => DimensionKind::Datetime,
+            &OutputKind::DatePeriod => DimensionKind::Datetime,
+            &OutputKind::Time => DimensionKind::Datetime,
+            &OutputKind::TimePeriod => DimensionKind::Datetime,
             &OutputKind::AmountOfMoney => DimensionKind::AmountOfMoney,
             &OutputKind::Temperature => DimensionKind::Temperature,
             &OutputKind::Duration => DimensionKind::Duration,
@@ -70,8 +99,8 @@ pub struct OrdinalOutput(pub i64);
 
 #[derive(Clone,Copy,PartialEq,Debug)]
 pub struct DatetimeOutput {
-    pub moment: Moment<Local>, 
-    pub grain: Grain, 
+    pub moment: Moment<Local>,
+    pub grain: Grain,
     pub precision: Precision,
     pub latent: bool,
 }
@@ -80,7 +109,12 @@ pub struct DatetimeOutput {
 pub enum DatetimeIntervalOutput {
     After(DatetimeOutput),
     Before(DatetimeOutput),
-    Between { start: Moment<Local>, end: Moment<Local>, precision: Precision, latent: bool }
+    Between {
+        start: Moment<Local>,
+        end: Moment<Local>,
+        precision: Precision,
+        latent: bool
+    }
 }
 
 #[derive(Clone,Copy,PartialEq,Debug)]

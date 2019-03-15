@@ -162,11 +162,16 @@ impl DatetimeValue {
         DatetimeValue {
             constraint: constraint,
             form: Form::Empty,
+            datetime_type: DatetimeType::Empty,
             direction: None,
             precision: Precision::Exact,
             latent: false,
             ambiguity: Ambiguity::No,
         }
+    }
+
+    pub fn datetime_type(self, datetime_type: DatetimeType) -> DatetimeValue {
+        DatetimeValue { datetime_type, ..self }
     }
 
     pub fn with_latent(self, latent: bool) -> DatetimeValue {
