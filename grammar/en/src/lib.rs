@@ -37,11 +37,11 @@ pub fn dims() -> Vec<rustling_ontology_values::DimensionKind> {
 pub fn examples() -> Vec<::rustling::train::Example<rustling_ontology_values::Dimension>> {
     let mut v = vec![];
     training::examples_numbers(&mut v);
-    training::examples_datetime(&mut v);
-    training::examples_durations(&mut v);
     training::examples_temperature(&mut v);
     training::examples_finance(&mut v);
     training::examples_percentage(&mut v);
+    training::examples_datetime(&mut v);
+    training::examples_durations(&mut v);
     v
 }
 

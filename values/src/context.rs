@@ -97,8 +97,8 @@ impl ParsingContext<Dimension> for ResolverContext {
                                             Output::Time(datetime_output_value)
                                         },
                                         DatetimeType::Empty => {
-                                            eprintln!("[3] Something went wrong - an Empty Datetime match has left interval boundary");
-                                            Output::Datetime(datetime_output_value)
+                                            eprintln!("[3] Empty Datetime match with left interval boundary - output as DatetimeInterval");
+                                            Output::DatetimeInterval(datetime_interval_output_value)
                                         },
                                     }
                                 }
@@ -118,8 +118,8 @@ impl ParsingContext<Dimension> for ResolverContext {
                                             Output::Time(datetime_output_value)
                                         },
                                         DatetimeType::Empty => {
-                                            eprintln!("[6] Something went wrong - an Empty has right interval boundary");
-                                            Output::Datetime(datetime_output_value)
+                                            eprintln!("[6] Empty Datetime match with right interval boundary - output as DatetimeInterval");
+                                            Output::DatetimeInterval(datetime_interval_output_value)
                                         },
                                     }
                                 }
@@ -147,7 +147,7 @@ impl ParsingContext<Dimension> for ResolverContext {
                                     Output::TimePeriod(datetime_interval_output_value)
                                 },
                                 DatetimeType::Empty => {
-                                    eprintln!("[9] Something went wrong - an Empty Datetime match has interval boundaries - output as DatetimeInterval");
+                                    eprintln!("[9] Empty Datetime match with interval boundaries - output as DatetimeInterval");
                                     Output::DatetimeInterval(datetime_interval_output_value)
                                 },
                             }
@@ -174,7 +174,7 @@ impl ParsingContext<Dimension> for ResolverContext {
                                     Output::Time(datetime_output_value)
                                 },
                                 DatetimeType::Empty => {
-                                    eprintln!("[12] Something went wrong - an Empty Datetime match has no interval boundaries - output as Datetime");
+                                    eprintln!("[12] Empty Datetime match with no interval boundaries - output as Datetime");
                                     Output::Datetime(datetime_output_value)
                                 },
                             }

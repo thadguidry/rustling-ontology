@@ -34,7 +34,16 @@ pub fn rules_time(b: &mut RuleSetBuilder<Dimension>) -> RustlingResult<()> {
 
 /** TimePeriod Rules */
 pub fn rules_time_period(b: &mut RuleSetBuilder<Dimension>) -> RustlingResult<()> {
-
+    b.rule_1_terminal("week-end",
+                      b.reg(r#"(?:the )?(?:week(?:\s|-)?end|wkend)"#)?,
+                      |_| {
+                          let friday = helpers::day_of_week(Weekday::Fri)?
+                              .intersect(&helpers::hour(18, false)?)?;
+                          let monday = helpers::day_of_week(Weekday::Mon)?
+                              .intersect(&helpers::hour(0, false)?)?;
+                          Ok(friday.span_to(&monday, false)?.datetime_type(DatetimeType::DatePeriod))
+                      }
+    );
     Ok(())
 
 }
@@ -1366,7 +1375,7 @@ pub fn rules_datetime(b: &mut RuleSetBuilder<Dimension>) -> RustlingResult<()> {
     );
     // DATETIME#146
     // TODO: output::time - check support / inclusion in other rules
-    b.rule_2("<meal><datetime>",
+    b.rule_2("<meal> time",
              datetime_check!(|datetime: &DatetimeValue| datetime.latent && form!(Form::Meal)(datetime)),
              b.reg("time")?,
              |a, _| Ok(a.value().clone().not_latent())
@@ -1467,7 +1476,7 @@ pub fn rules_datetime(b: &mut RuleSetBuilder<Dimension>) -> RustlingResult<()> {
     /* DATETIME - DATE-PERIOD - GRAINS AS DATE INTERVALS */
 
     // DATETIME#156
-    // TODO: output::datetime
+    // TODO: output::date-period
     b.rule_1_terminal("week-end",
                       b.reg(r#"(?:the )?(?:week(?:\s|-)?end|wkend)"#)?,
                       |_| {
@@ -1477,6 +1486,12 @@ pub fn rules_datetime(b: &mut RuleSetBuilder<Dimension>) -> RustlingResult<()> {
                               .intersect(&helpers::hour(0, false)?)?;
                           friday.span_to(&monday, false)
                       }
+    );
+    b.rule_1("Duplicate DatePeriod",
+             datetime_check!(|datetime: &DatetimeValue| datetime.datetime_type == DatetimeType::DatePeriod),
+             |date_period| {
+                 Ok(date_period.value().clone().datetime_type(DatetimeType::DatetimeGeneral))
+             }
     );
     // DATETIME#157
     // TODO: output::date-period + add dedicated form + check use in rules w/ date-period
